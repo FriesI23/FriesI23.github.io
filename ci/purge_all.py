@@ -1,7 +1,7 @@
 # Copyright @Myth 2024
 # see: https://myth.cx/p/hugo-auto-submit-baidu/
 
-import sys
+import sys, os
 import requests
 import lxml.etree
 
@@ -25,14 +25,20 @@ def purge_url(url):
         print(f"failed, got exception: {e}", file=sys.stderr)
 
 
-def get_urls(sitemap_path):
-    tree = lxml.etree.parse(sitemap_path)
-    namespaces = {
-        "sitemapindex": "http://www.sitemaps.org/schemas/sitemap/0.9",
-    }
+def get_urls(sitemap_path: str):
     urls = []
-    for url in tree.xpath("//sitemapindex:loc/text()", namespaces=namespaces):
-        urls.append(url)
+    if sitemap_path.endswith("xml"):
+        tree = lxml.etree.parse(sitemap_path)
+        namespaces = {
+            "sitemapindex": "http://www.sitemaps.org/schemas/sitemap/0.9",
+        }
+        for url in tree.xpath("//sitemapindex:loc/text()", namespaces=namespaces):
+            urls.append(url)
+    else:
+        with open(sitemap_path) as fd:
+            urls.extend(
+                i for i in (i.strip() for i in fd.readlines()) if not i.startswith("#")
+            )
     return urls
 
 
