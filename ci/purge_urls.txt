@@ -3,6 +3,7 @@ https://friesi23.cn/
 https://friesi23.cn/page2/
 https://friesi23.cn/categories/
 https://friesi23.cn/tags/
+https://friesi23.cn/post/202411/nginx-cache-2
 # https://friesi23.cn/about/
 # https://friesi23.cn/assets/css/main.css
 # https://friesi23.cn/assets/js/init-theme.js

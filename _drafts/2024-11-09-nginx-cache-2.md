@@ -11,7 +11,7 @@ title: 正确利用 Nginx 缓存加速 Github Page 访问
 excerpt: |
   最近在尝试为博客进行缓存预热时, 发现脚本请求明明已经显示 "HIT", 同时服务器也设置了正确的 "proxy_cache_key",
   但是使用浏览器或其他设备访问还是可能无法命中缓存 ("MISS").
-  本文将尝试分析产生这类问题的原因并给出正确的配置方法, 最终达到大幅提高缓存命中率的目的.
+  本文将尝试分析产生这类问题的原因, 并给出一个可能的代替方案.
 author: FriesI23
 date: 2024-11-09 10:00:00 +0800
 category:
@@ -189,7 +189,8 @@ server {
 SUM = C(4, 1) × 1! + C(4, 2) × 2! + C(4, 3) × 3! + C(4, 4) × 4! = 64
 ```
 
-种组合的 `key`, 这显然是不能接受的, 因为如果返回的是 `br`, 那缓存的实际就是一份数据, 那就应该 HIT 而不是 MISS.
+种组合的 `key` 和对应的缓存文件, 这显然是不能接受的, 因为如果返回的是 `br`, 那缓存的实际就是一份数据, 那最好就应该 HIT 而不是 MISS,
+次一点也应该总是在服务器存一种缓存数据.
 
 那应该怎样解决呢, 我们可以 "标准化" `Vary` 支持的相关头. 下面会介绍配置方法, 以 [`Accept-Encoding`](#4-标准化) 为例.
 
@@ -215,13 +216,16 @@ server {
 ```
 
 不过需要注意的是 Nginx 的缓存行为发生在压缩前. 这会导致如果启用缓存且后端服务器响应不支持对应压缩方式时,
-每次请求命中缓存后内容都会重新被实时压缩. 当然 Github Page 大概肯定是支持 gzip 的, 所以可以放心打开.
+每次请求命中缓存后内容都会重新被实时压缩.
 
 ### 4.2. 标准化 "Accept-Encoding" 请求头
 
 前面我们已经知道导致缓存频繁 MISS 的罪魁祸首就是 `Accept-Encoding` 这类请求头导致 `key` 的排列组合,
 因此解决思路就是让 `Accept-Encoding` 中的每一种压缩类型都对应一个 `key`,
 也就是在 Nginx 请求到后端时保证 `Accept-Encoding` 中只有一种压缩类型 (选择压缩方式由 Nginx 代理).
+
+不过 Nginx 只会在缓存 `key` 中使用最原始未修改的 `Accept-Encoding`, 且该行为不能修改. 因此我们退而求其次,
+选择将所有的 `key` 都映射到同一个资源中.
 
 ```nginx
 map $http_accept_encoding $encoding {
@@ -242,7 +246,11 @@ server {
 1. Client 请求中包含 `Accept-Encoding: gzip, deflate, br, zstd`, 表示客户端支持以下几种压缩方式并期待服务器返回其中一种.
 2. Nginx 收到请求后, 将头重写为 `Accept-Encoding: gzip`, 将其转发给真正的后端.
 3. 后端应答后, Nginx 收到 Response, 假设内容为: `Vary: Accept-Encoding, Content-Encoding: gzip`.
-   此时 Nginx 将请求转发回客户端, 同时对响应内容进行缓存 (`key`: [`gzip`, `<$proxy_cache_key>`]).
+   此时 Nginx 将请求转发回客户端, 同时对响应内容进行缓存 (`key`: [`gzip, deflate, br, zstd`, `<$proxy_cache_key>`]).
+4. 如果 Client 下一个请求中包含 `Accept-Encoding: gzip, br`, 还是会走一遍上面的流程, 但是:
+5. Nginx 将请求转发回客户端, 同时对响应内容进行缓存 (`key`: [`gzip, br`, `<$proxy_cache_key>`]).
+
+此时我们便可以防止每一种组合的压缩方式的结果都在服务器缓存一次.
 
 需要注意的是 map 是由上到下匹配的, 如果你的服务器配置了 `brotli` 且希望可以优先使用, 可以配置如下
 (记得打开 Nginx 对 `brotli` 的支持: `brotli on; brotli_vary on;`):

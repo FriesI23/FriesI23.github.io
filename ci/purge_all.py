@@ -17,7 +17,7 @@ def insert_path_segment(url, segment):
 
 
 def purge_url(url):
-    headers = {"User-Agent": "curl/7.12.1"}
+    headers = {"User-Agent": "curl/7.12.1", "Accept-Encoding": "gzip"}
     try:
         res = requests.get(url, headers=headers, timeout=10)
         print(f"success: {url}, got {res.text}")
