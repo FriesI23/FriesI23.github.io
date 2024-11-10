@@ -17,12 +17,15 @@ def insert_path_segment(url, segment):
 
 
 def purge_url(url):
-    headers = {"User-Agent": "curl/7.12.1", "Accept-Encoding": "gzip"}
-    try:
-        res = requests.get(url, headers=headers, timeout=10)
-        print(f"success: {url}, got {res.text}")
-    except Exception as e:
-        print(f"failed, got exception: {e}", file=sys.stderr)
+    for encoding in ["", "gzip", "deflate", "br", "zstd"]:
+        headers = {"User-Agent": "curl/7.12.1"}
+        if encoding:
+            headers["Accept-Encoding"] = "gzip"
+        try:
+            res = requests.get(url, headers=headers, timeout=10)
+            print(f"success[{encoding}]: {url}, got {res.status_code}")
+        except Exception as e:
+            print(f"failed, got exception: {e}", file=sys.stderr)
 
 
 def get_urls(sitemap_path: str):
