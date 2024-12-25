@@ -6,7 +6,6 @@
 #
 #  You should have received a copy of the license along with this
 #  work. If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
-classes: wide
 title: 正确利用 Nginx 缓存加速 Github Page 访问
 excerpt: |
   最近在尝试为博客进行缓存预热时, 发现脚本请求明明已经显示 "HIT", 同时服务器也设置了正确的 "proxy_cache_key",
