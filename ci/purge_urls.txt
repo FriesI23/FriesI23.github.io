@@ -1,6 +1,8 @@
 # purge urls
 https://friesi23.cn/
+https://friesi23.cn/page1/
 https://friesi23.cn/page2/
+https://friesi23.cn/page3/
 https://friesi23.cn/categories/
 https://friesi23.cn/tags/
 # https://friesi23.cn/about/

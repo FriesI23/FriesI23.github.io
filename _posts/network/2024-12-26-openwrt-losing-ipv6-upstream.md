@@ -6,7 +6,7 @@
 #
 #  You should have received a copy of the license along with this
 #  work. If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
-title: 解决家庭环境 IPV6 断线重播后，有概率无法获取 IPV6 地址的问题
+title: 解决家庭环境宽带断线重播后，有概率无法获取 IPV6 地址的问题
 excerpt: |
   最近于家庭路由开通 IPV6 后，凌晨运营商断线重新分配 IP 时，有一定概率获取不到 IPV6 地址（IPV4 正常）。
   通过大量的搜索与尝试最终解决该问题，故在这里简单记录一下，后续如有类似问题也可作参考。
