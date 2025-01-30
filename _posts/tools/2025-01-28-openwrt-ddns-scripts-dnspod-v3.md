@@ -11,7 +11,7 @@ excerpt: |
   使用 ddns-scripts_tencent_cloud 为 OpenWRT 提供对 DNSPod 的 DDns 支持，
   脚本使用最新的 v3 API，支持 IPV4 与 IPV6 地址，同时提供对 ddns-scripts LUCI 界面中的各种配置项的兼容。
 author: FriesI23
-date: 2025-01-30 08:00:00 +0800
+date: 2025-01-28 08:00:00 +0800
 category: tools
 tags:
   - openwrt
